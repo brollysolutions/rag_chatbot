@@ -28,6 +28,8 @@ services:
       - "8080:8080"
     env_file:
       - .env
+    volumes:
+      - ./documents:/app/documents
     environment:
       - ENV=production
       - HF_HOME=/app/hf_cache
