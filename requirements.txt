@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+pydantic
+qdrant-client
+groq
+openai
+langdetect
+pymupdf
+sentence-transformers
+langchain-text-splitters
+python-dotenv
+httpx
+einops
