@@ -117,9 +117,12 @@
 
 from groq import Groq
 from openai import OpenAI
-from app.config import OPENAI_API_KEY, GROQ_API_KEY, LLM_MODEL, ENV
+from app.config import (
+    OPENAI_API_KEY, GROQ_API_KEY, LLM_MODEL, ENV,
+    CACHE_COLLECTION_NAME, CACHE_THRESHOLD 
+)
 from app.prompts import SYSTEM_PROMPT, FALLBACK_MESSAGE, CONTACT_INFO
-from app.retrieval import retrieve_context, detect_language
+from app.retrieval import retrieve_context_with_vector, detect_language, embed_query, qdrant_client
 
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
 groq_client = Groq(api_key=GROQ_API_KEY)
@@ -154,17 +157,46 @@ def _call_llm(messages: list[dict]) -> str:
     except Exception as e:
         return FALLBACK_MESSAGE
 
+
+def check_cache(query_vector: list[float]):
+    """Look for a similar query in the cache collection."""
+    results = qdrant_client.query_points(
+        collection_name=CACHE_COLLECTION_NAME,
+        query=query_vector,
+        limit=1,
+        score_threshold=CACHE_THRESHOLD
+    ).points
+    
+    if results:
+        return results[0].payload.get("cached_answer")
+    return None
+
+def save_to_cache(query_vector: list[float], question: str, answer: str):
+    """Store the query vector and LLM answer for future hits."""
+    import uuid
+    point_id = str(uuid.uuid4())
+    qdrant_client.upsert(
+        collection_name=CACHE_COLLECTION_NAME,
+        points=[{
+            "id": point_id,
+            "vector": query_vector,
+            "payload": {"question": question, "cached_answer": answer}
+        }]
+    )
+
 def get_answer(question: str, history: list[dict] = None) -> str:
     """
-    Full RAG pipeline:
-    1. detect language
-    2. check greeting shortcut
-    3. retrieve text from Qdrant
-    4. build prompt with history + context
-    5. call LLM
+    Enhanced RAG pipeline with Semantic Caching:
+    1. Language detection
+    2. Greeting shortcut
+    3. Semantic Cache lookup (if no history)
+    4. Retrieval from Qdrant
+    5. Call LLM & Update Cache
     """
     history = history or []
     detected_lang = detect_language(question)
+    
+    # 1. GREETING SHORTCUT
     if question.lower().strip() in GREETINGS:
         return (
             "Hello! I'm the Digital Brolly Assistant.\n\n"
@@ -172,13 +204,26 @@ def get_answer(question: str, history: list[dict] = None) -> str:
             "fees, placements, and more. How can I assist you today?"
         )
 
-    context, _ = retrieve_context(question)
+    # 2. GENERATE EMBEDDING ONCE
+    # We use this vector for both cache lookup and document retrieval
+    query_vector = embed_query(question)
 
-    print("--- RETRIEVED CONTEXT ---")
-    print(context)
+    # 3. SEMANTIC CACHE LOOKUP
+    # Only use cache for stateless queries (no history) to ensure context accuracy
+    if not history:
+        cached_response = check_cache(query_vector)
+        if cached_response:
+            print("--- SEMANTIC CACHE HIT ---")
+            return cached_response
+
+    # 4. DOCUMENT RETRIEVAL
+    # Pass the pre-computed vector to avoid redundant embedding work
+    context, _ = retrieve_context_with_vector(query_vector)
     
     if not context:
         return FALLBACK_MESSAGE
+
+    # 5. LLM ORCHESTRATION
     user_prompt = (
         f"[detected_language: {detected_lang}]\n\n"
         f"--- DOCUMENT CONTEXT START ---\n"
@@ -193,4 +238,11 @@ def get_answer(question: str, history: list[dict] = None) -> str:
     messages.extend(history)
     messages.append({"role": "user", "content": user_prompt})
 
-    return _call_llm(messages)
+    final_answer = _call_llm(messages)
+
+    # 6. UPDATE CACHE
+    # Store successful, stateless answers for future efficiency[cite: 1, 2]
+    if not history and final_answer != FALLBACK_MESSAGE:
+        save_to_cache(query_vector, question, final_answer)
+
+    return final_answer

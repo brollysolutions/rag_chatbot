@@ -6,8 +6,6 @@ from app.config import (
     COLLECTION_NAME, TOP_K, SCORE_THRESHOLD
 )
 
-
-
 print("Loading multilingual embedding model...")
 embedding_model = SentenceTransformer(
     "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
@@ -36,11 +34,8 @@ def embed_query(query: str) -> list[float]:
     return embedding_model.encode(query).tolist()
 
 
-
-
-def retrieve_context(query: str) -> tuple[str, list[float]]:
-    query_embed = embed_query(query)
-
+def retrieve_context_with_vector(query_embed: list[float]) -> tuple[str, list[float]]:
+    """Retrieve chunks using an already computed embedding vector."""
     response = qdrant_client.query_points(
         collection_name=COLLECTION_NAME,
         query=query_embed,
@@ -57,3 +52,9 @@ def retrieve_context(query: str) -> tuple[str, list[float]]:
             docs.append(hit.payload["text"])
 
     return "\n\n".join(docs), query_embed
+
+
+def retrieve_context(query: str) -> tuple[str, list[float]]:
+    """Legacy wrapper for endpoints that still pass raw text instead of vectors."""
+    query_embed = embed_query(query)
+    return retrieve_context_with_vector(query_embed)

@@ -8,6 +8,10 @@ langdetect
 pymupdf
 sentence-transformers
 langchain-text-splitters
+langchain-openai
 python-dotenv
 httpx
 einops
+ragas
+datasets
+pandas
