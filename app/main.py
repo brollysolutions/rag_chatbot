@@ -8,8 +8,14 @@ import httpx
 from app.rag_service import get_answer
 from app.prompts import CONTACT_INFO
 from app.config import APPS_SCRIPT_URL
+from init_cache import setup_collections
 
 app = FastAPI(root_path="/rag_chatbot")
+
+@app.on_event("startup")
+async def startup_event():
+    setup_collections()
+
 
 app.add_middleware(
     CORSMiddleware,
