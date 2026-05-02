@@ -11,8 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip wheel --no-cache-dir --wheel-dir /app/wheels --no-deps ragas && \
+RUN pip wheel --no-cache-dir --wheel-dir /app/wheels --no-deps ragas && \
     pip wheel --no-cache-dir --wheel-dir /app/wheels -r requirements.txt
 
 
