@@ -69,3 +69,5 @@ logs/
 # documents/
 
 testing_faqs
+
+torch_wheels/
