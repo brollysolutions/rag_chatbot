@@ -23,7 +23,6 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 # Tell HuggingFace where to cache the model inside the image
 ENV HF_HOME=/app/hf_cache
-ENV HF_HUB_OFFLINE=1
 
 RUN groupadd --gid 1001 appgroup && \
     useradd --uid 1001 --gid appgroup --no-create-home appuser
