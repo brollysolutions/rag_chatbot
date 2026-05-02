@@ -68,7 +68,7 @@ async def submit_lead(lead: LeadInfo):
         raise HTTPException(status_code=500, detail="Server configuration error")
     
     try:
-        async with httpx.AsyncClient(verify=True, timeout=20.0) as client:
+        async with httpx.AsyncClient(verify=True, timeout=20.0, follow_redirects=True) as client:
             response = await client.post(APPS_SCRIPT_URL, json=lead.dict())
             
             if not response.text.strip().startswith('{'):
