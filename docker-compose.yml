@@ -15,10 +15,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 20s
-    deploy:
-      resources:
-        limits:
-          memory: 2G
 
   web:
     build:
@@ -44,11 +40,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    deploy:
-      resources:
-        limits:
-          memory: 3G
-          cpus: "2.0"
 
 volumes:
   qdrant_data:
