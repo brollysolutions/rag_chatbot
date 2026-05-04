@@ -8,8 +8,14 @@ import httpx
 from app.rag_service import get_answer
 from app.prompts import CONTACT_INFO
 from app.config import APPS_SCRIPT_URL
+from init_cache import setup_collections
 
 app = FastAPI(root_path="/rag_chatbot")
+
+@app.on_event("startup")
+async def startup_event():
+    setup_collections()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -66,7 +72,7 @@ async def submit_lead(lead: LeadInfo):
         raise HTTPException(status_code=500, detail="Server configuration error")
     
     try:
-        async with httpx.AsyncClient(verify=True, timeout=20.0) as client:
+        async with httpx.AsyncClient(verify=True, timeout=20.0, follow_redirects=True) as client:
             response = await client.post(APPS_SCRIPT_URL, json=lead.dict())
             
             if not response.text.strip().startswith('{'):
