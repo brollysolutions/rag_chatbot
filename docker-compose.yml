@@ -9,16 +9,13 @@ services:
       - "6334:6334"
     volumes:
       - qdrant_data:/qdrant/storage
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 20s
-    deploy:
-      resources:
-        limits:
-          memory: 2G
+    # Removed healthcheck to prevent issues on low-RAM server
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5
+    #   start_period: 20s
 
   web:
     build:
@@ -31,24 +28,20 @@ services:
       - "8080:8080"
     env_file:
       - .env
+    volumes:
+      - ./documents:/app/documents
     environment:
       - ENV=production
       - HF_HOME=/app/hf_cache
       - HF_HUB_OFFLINE=1
     depends_on:
-      qdrant:
-        condition: service_healthy
+      - qdrant
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    deploy:
-      resources:
-        limits:
-          memory: 3G
-          cpus: "2.0"
 
 volumes:
   qdrant_data:
