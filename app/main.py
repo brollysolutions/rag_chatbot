@@ -62,6 +62,10 @@ def chat(request: ChatRequest) -> ChatResponse:
         
     return ChatResponse(answer=answer, contact_info=contact_info)
 
+
+
+
+
 @app.post("/submit-lead")
 async def submit_lead(lead: LeadInfo):
     if not APPS_SCRIPT_URL:

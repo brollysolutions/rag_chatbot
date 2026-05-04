@@ -1,120 +1,3 @@
-
-# """
-# Using Ollama as Embeddings - test2
-# """
-# import os
-# # import chromadb
-# # from groq import Groq
-# from sentence_transformers import SentenceTransformer
-# from openai import OpenAI
-# from dotenv import load_dotenv
-# from app.config import OPENAI_API_KEY
-# from app.prompts import FALLBACK_MESSAGE, SYSTEM_PROMPT, CONTACT_INFO
-
-# """-----------------------------------------------------------------------"""
-# from qdrant_client import QdrantClient
-
-
-# load_dotenv()
-
-# # Initialize Groq Client
-# # groq_client = Groq(api_key=GROQ_API_KEY)
-# openai_client = OpenAI(api_key=OPENAI_API_KEY)
-
-# # Initialize ChromaDB Client
-# # vector_db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "vector_db_ollama")
-# # client = chromadb.PersistentClient(path=vector_db_path)
-# # collection = client.get_or_create_collection("brolly_docs_v3", metadata={"hnsw:space": "cosine"})
-
-
-# qdrant_host = os.getenv("QDRANT_HOST")
-# qdrant_port = int(os.getenv("QDRANT_PORT"))
-# qdrant_client = QdrantClient(host=qdrant_host, port=qdrant_port)
-# COLLECTION_NAME = "brolly_docs_v5"
-
-# # Initialize SentenceTransformer (Downloads the ~500MB model on the first run)
-# print("Loading Embedding Model...")
-# embedding_model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True)
-# print("Model Loaded Successfully!")
-
-
-# def get_answer(question):
-
-#     greetings = ["hi", "hello", "hey", "namaste", "hallo", "hi hello"]
-    
-#     if question.lower().strip() in greetings:
-#         return "Hello! I'm the Digital Brolly Assistant. I can help you with details about our Digital Marketing and AI courses, fees, and placements. How can I assist you today?"
-        
-#     try:
-#         query_embedding = embedding_model.encode(f"search_query: {question}").tolist()
-#     except Exception as e:
-#         print(f"Error generating embedding: {e}")
-#         return FALLBACK_MESSAGE
-
-#     try:
-#         response = qdrant_client.query_points(
-#             collection_name=COLLECTION_NAME,
-#             query=query_embedding,  
-#             limit=5,
-#             with_payload=True
-#         )
-#         search_result = response.points  
-        
-#     except Exception as e:
-#         print(f"Error querying Qdrant: {e}")
-#         return FALLBACK_MESSAGE
-
-#     if not search_result:
-#         return FALLBACK_MESSAGE
-
-#     docs = [hit.payload["text"] for hit in search_result if hit.payload and "text" in hit.payload]
-#     context = "\n\n".join(docs)
-
-
-#     # --- DEBUG BLOCK ---
-#     # print("\n" + "="*40)
-#     # print("DEBUG: EXACT CONTEXT SENT TO LLM:")
-#     # print(context)
-#     # print("="*40 + "\n")
-#     # -------------------------------
-
-#     user_prompt = f"""You are a helpful assistant for Digital Brolly. Use the following context to answer the user's question.
-
-#     --- DOCUMENT CONTEXT START ---
-#     {context}
-#     --- DOCUMENT CONTEXT END ---
-
-#     If the answer cannot be found in the context, do NOT try to make up an answer. Instead, reply EXACTLY with this message:
-#     {FALLBACK_MESSAGE}
-
-#     User Question: {question}"""
-
-#     try:
-#         completion = openai_client.chat.completions.create(
-#             messages=[
-#                 {"role": "system", "content": SYSTEM_PROMPT},
-#                 {"role": "user", "content": user_prompt}
-#             ],
-#             model="gpt-4o-mini",
-#             stream=True,
-#             stop=None,
-#             temperature=0
-#         )
-
-#         full_response = ""
-#         for chunk in completion:
-#             if chunk.choices and chunk.choices[0].delta.content:
-#                 content = chunk.choices[0].delta.content
-#                 full_response += content
-
-#         return full_response if full_response else FALLBACK_MESSAGE
-
-#     except Exception as e:
-#         print(f"Error calling OpenAI API: {e}")
-#         return FALLBACK_MESSAGE
-
-
-
 from groq import Groq
 from openai import OpenAI
 from app.config import (
@@ -128,7 +11,7 @@ openai_client = OpenAI(api_key=OPENAI_API_KEY)
 groq_client = Groq(api_key=GROQ_API_KEY)
 
 GREETINGS = {
-    "hi", "hello", "hey", "namaste", "hallo",
+    "hi", "hello", "hey", "namaste", "hallo", "hi hello",
     "హాయ్", "నమస్కారం",
     "नमस्ते", "हेलो"
 }
@@ -155,6 +38,7 @@ def _call_llm(messages: list[dict]) -> str:
         clean_text = re.sub(r'\[detected_language:.*?\]\n*', '', raw_text).strip()
         return clean_text
     except Exception as e:
+        print(f"\n🚨 API CRASH REASON: {e}\n")
         return FALLBACK_MESSAGE
 
 
@@ -184,19 +68,89 @@ def save_to_cache(query_vector: list[float], question: str, answer: str):
         }]
     )
 
+def compress_history(history: list[dict]) -> list[dict]:
+    """
+    Auto-compress old history on context overflow to save tokens[cite: 1].
+    Keeps the most recent 2 turns (4 messages) verbatim and summarizes the rest.
+    """
+    if len(history) <= 4:
+        return history
+    recent_history = history[-4:]
+    old_history = history[:-4]
+
+    convo_text = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in old_history])
+
+    summary_prompt = (
+        "Briefly summarize the following conversation history. "
+        "Focus on the user's core intent, the courses they asked about, and any key details provided. "
+        "Do not answer questions, just summarize.\n\n"
+        f"History:\n{convo_text}"
+    )
+
+    try:
+        response = openai_client.chat.completions.create(
+            model=LLM_MODEL,
+            messages=[{"role": "user", "content": summary_prompt}],
+            temperature=0,
+            max_tokens=150
+        )
+        summary = response.choices[0].message.content
+        return [{"role": "system", "content": f"Previous conversation summary: {summary}"}] + recent_history
+        
+    except Exception as e:
+        print(f"\n🚨 HISTORY COMPRESSION FAILED: {e}\n")
+        return recent_history
+
+def get_query_variants(question: str) -> list[str]:
+    """
+    Multi-query retrieval: Use the LLM to generate alternative phrasings 
+    of the user's question to improve retrieval.
+    """
+    prompt = (
+        "Rewrite the following question from a student into 2 different search queries to query a database. "
+        "Keep them short and focused on digital marketing courses, fees, tools, or placements. "
+        "Return ONLY the 2 queries separated by a newline.\n\n"
+        f"Question: {question}"
+    )
+    
+    messages = [{"role": "user", "content": prompt}]
+    
+    try:
+        if ENV == "production":
+            response = openai_client.chat.completions.create(
+                model=LLM_MODEL,
+                messages=messages,
+                temperature=0.3,
+                max_tokens=50
+            )
+        else:
+            response = groq_client.chat.completions.create(
+                model=LLM_MODEL,
+                messages=messages,
+                temperature=0.3,
+                max_tokens=50
+            )
+            
+        variants = response.choices[0].message.content.strip().split('\n')
+        return [v.strip('- "123.') for v in variants if v.strip()]
+    except Exception as e:
+        print(f"Variant generation failed: {e}")
+        return []
+
+
 def get_answer(question: str, history: list[dict] = None) -> str:
     """
-    Enhanced RAG pipeline with Semantic Caching:
+    Enhanced RAG pipeline with Semantic Caching & Multi-Query Expansion:
     1. Language detection
     2. Greeting shortcut
     3. Semantic Cache lookup (if no history)
-    4. Retrieval from Qdrant
+    4. Multi-Query Expansion & Retrieval from Qdrant[cite: 1]
     5. Call LLM & Update Cache
     """
     history = history or []
     detected_lang = detect_language(question)
     
-    # 1. GREETING SHORTCUT
+
     if question.lower().strip() in GREETINGS:
         return (
             "Hello! I'm the Digital Brolly Assistant.\n\n"
@@ -204,21 +158,33 @@ def get_answer(question: str, history: list[dict] = None) -> str:
             "fees, placements, and more. How can I assist you today?"
         )
 
-    # 2. GENERATE EMBEDDING ONCE
-    # We use this vector for both cache lookup and document retrieval
     query_vector = embed_query(question)
 
-    # 3. SEMANTIC CACHE LOOKUP
-    # Only use cache for stateless queries (no history) to ensure context accuracy
     if not history:
         cached_response = check_cache(query_vector)
         if cached_response:
             print("--- SEMANTIC CACHE HIT ---")
             return cached_response
 
-    # 4. DOCUMENT RETRIEVAL
-    # Pass the pre-computed vector to avoid redundant embedding work
-    context, _ = retrieve_context_with_vector(query_vector)
+    variants = get_query_variants(question)
+    
+    unique_chunks = set()
+    
+    original_ctx, _ = retrieve_context_with_vector(query_vector)
+    if original_ctx:
+        for chunk in original_ctx.split('\n\n'):
+            if chunk.strip():
+                unique_chunks.add(chunk.strip())
+                
+    for var_q in variants:
+        var_vec = embed_query(var_q)
+        var_ctx, _ = retrieve_context_with_vector(var_vec)
+        if var_ctx:
+            for chunk in var_ctx.split('\n\n'):
+                if chunk.strip():
+                    unique_chunks.add(chunk.strip())
+
+    context = "\n\n".join(list(unique_chunks)[:6])
     
     if not context:
         return FALLBACK_MESSAGE
@@ -234,14 +200,15 @@ def get_answer(question: str, history: list[dict] = None) -> str:
         f"User Question: {question}"
     )
 
+    compressed_history = compress_history(history)
+    
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-    messages.extend(history)
+    messages.extend(compressed_history)
     messages.append({"role": "user", "content": user_prompt})
 
     final_answer = _call_llm(messages)
 
     # 6. UPDATE CACHE
-    # Store successful, stateless answers for future efficiency[cite: 1, 2]
     if not history and final_answer != FALLBACK_MESSAGE:
         save_to_cache(query_vector, question, final_answer)
 

@@ -46,7 +46,6 @@ def extract_text_from_pdf(file_path: str) -> str:
     for page in doc:
         text = page.get_text()
         if text:
-            # This completely crushes random newlines and weird spacing
             clean_text = " ".join(text.split())
             extracted_text += clean_text + "\n\n"
     return extracted_text
@@ -68,7 +67,6 @@ def ingest_file(file_path: str):
     
     points = [
         models.PointStruct(
-            # ID uses filename + index + text to ensure absolute uniqueness
             id=str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{filename}_{i}_{chunks[i]}")),
             vector=embeddings[i],
             payload={

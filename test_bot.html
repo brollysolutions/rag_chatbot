@@ -868,5 +868,70 @@ async function sendMessage() {
   }
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
+
+// --- FORM VALIDATION & SUBMISSION LOGIC ---
+document.getElementById('submit-lead-btn').onclick = async () => {
+    const name = document.getElementById('lead-name').value.trim();
+    const email = document.getElementById('lead-email').value.trim();
+    const phone = document.getElementById('lead-phone').value.trim();
+    const errorEl = document.getElementById('lead-error');
+    const btn = document.getElementById('submit-lead-btn');
+
+    // Basic empty check
+    if (!name || !email || !phone) {
+        errorEl.innerHTML = "<strong>Missing info:</strong> Please fill out all fields.";
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    // Regex Validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]{2,}\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^\+?[\d\s-]{10,15}$/; 
+
+    if (!emailRegex.test(email)) {
+        errorEl.innerHTML = "<strong>Invalid Email:</strong> Please check your email format.";
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    const cleanPhone = phone.replace(/[\s-]/g, '');
+    if (!phoneRegex.test(phone) || cleanPhone.length < 10) {
+        errorEl.innerHTML = "<strong>Invalid Phone:</strong> Enter a valid 10+ digit number.";
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    // All clear - proceed
+    errorEl.style.display = 'none';
+    btn.textContent = "Saving...";
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('http://127.0.0.1:8080/submit-lead', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, phone })
+        });
+
+        if (response.ok) {
+            localStorage.setItem('brolly_user_verified', 'true');
+            isVerified = true;
+            
+            document.getElementById('lead-overlay').style.display = 'none';
+       
+            if (pendingMessage) {
+                inputEl.value = pendingMessage;
+                sendMessage(); 
+            }
+        } else {
+            throw new Error("API rejected the submission");
+        }
+    } catch (err) {
+        errorEl.innerHTML = "<strong>Connection Error:</strong> Could not save details. Please try again.";
+        errorEl.style.display = 'block';
+        btn.textContent = "Start Chatting";
+        btn.disabled = false;
+    }
+};
+
 </script>
-<!-- CHATBOT END -->
