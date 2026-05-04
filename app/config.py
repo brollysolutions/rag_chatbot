@@ -14,11 +14,11 @@ LLM_MODEL = "gpt-4o-mini" if ENV == "production" else "llama-3.3-70b-versatile"
 QDRANT_HOST = os.getenv("QDRANT_HOST", "qdrant")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", 6333))
 
-COLLECTION_NAME = "brolly_docs_v8" 
+COLLECTION_NAME = "brolly_docs_v9" 
 VECTOR_SIZE = 384
 
 TOP_K = 10
-SCORE_THRESHOLD = 0.05
+SCORE_THRESHOLD = 0
 
 
 CACHE_COLLECTION_NAME = "brolly_cache_v5"

@@ -13,7 +13,6 @@ services:
           memory: 2G
 
   web:
-    # FIX 1: Explicitly point to the dev Dockerfile
     build: 
       context: .
       dockerfile: Dockerfile.dev
@@ -26,7 +25,6 @@ services:
     environment:
       - ENV=development
       - HF_HOME=/root/.cache/huggingface
-      # FIX 2: Allow internet so the volume can populate on first run
       - HF_HUB_OFFLINE=0 
     volumes:
       - hf_cache:/root/.cache/huggingface

@@ -102,41 +102,29 @@ def compress_history(history: list[dict]) -> list[dict]:
         return recent_history
 
 def get_query_variants(question: str) -> list[str]:
-    """
-    Multi-query retrieval: Use the LLM to generate alternative phrasings 
-    of the user's question to improve retrieval.
-    """
+    """Uses LLM to generate search variations, automatically injecting context for short queries."""
     prompt = (
-        "Rewrite the following question from a student into 2 different search queries to query a database. "
-        "Keep them short and focused on digital marketing courses, fees, tools, or placements. "
+        "You are a search query generator for 'Digital Brolly', an AI Digital Marketing Institute in Hyderabad. "
+        "Rewrite the following user query into 2 different, highly specific search queries for a vector database. "
+        "CRITICAL: If the user's query is very short or vague (like 'address?', 'location', or 'fees'), "
+        "you MUST expand it to explicitly include the institute's name (e.g., 'Digital Brolly institute address location'). "
         "Return ONLY the 2 queries separated by a newline.\n\n"
-        f"Question: {question}"
+        f"User Query: {question}"
     )
     
-    messages = [{"role": "user", "content": prompt}]
-    
     try:
-        if ENV == "production":
-            response = openai_client.chat.completions.create(
-                model=LLM_MODEL,
-                messages=messages,
-                temperature=0.3,
-                max_tokens=50
-            )
-        else:
-            response = groq_client.chat.completions.create(
-                model=LLM_MODEL,
-                messages=messages,
-                temperature=0.3,
-                max_tokens=50
-            )
-            
+        client = openai_client if ENV == "production" else groq_client
+        response = client.chat.completions.create(
+            model=LLM_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            max_tokens=50
+        )
         variants = response.choices[0].message.content.strip().split('\n')
         return [v.strip('- "123.') for v in variants if v.strip()]
     except Exception as e:
         print(f"Variant generation failed: {e}")
         return []
-
 
 def get_answer(question: str, history: list[dict] = None) -> str:
     """

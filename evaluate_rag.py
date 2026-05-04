@@ -32,72 +32,79 @@ _ragas_embeddings = embedding_factory(
 )
 
 # ── Test Questions ────────────────────────────────────────────────────────────
+# TEST_QUESTIONS = [
+#     # --- Category 1: Direct Factual Retrieval (Easy) ---
+#     "What is the full address of the Digital Brolly headquarters?",
+#     "Who is the founder of Digital Brolly?",
+#     "How many years of experience does Ravi Varma have?",
+#     "What is the total fee for the BDLP program?",
+#     "Who is Ambika Kiran and what is her role?",
+#     "Does Digital Brolly offer live online training?",
+
+#     # --- Category 2: Hybrid Search & Keyword Precision (Testing Sparse/BM25) ---
+#     # These test if the bot finds specific tools and award titles exactly.
+#     "Who exactly received the Business Icon Award?",
+#     "Do you teach WP Hide and Wordfence Security?",
+#     "What is the total fee for the BDDP?",  # Harder to distinguish from BDCP/BDLP
+#     "Does the Brolly Agency offer services, or is it just a training institute?",
+#     "Is there a program that involves a Deemed University?",
+
+#     # --- Category 3: Multi-Query Expansion (Testing Vague/Short Queries) ---
+#     # These test if your expansion logic understands "lazy" student typing.
+#     "cost of career prog",
+#     "internship diffs",
+#     "tools for ai",
+#     "JNTU metro branch details",
+#     "ambika placements",
+
+#     # --- Category 4: Multi-Hop & Comparative (Medium) ---
+#     "What is the exact difference in internship duration and placement support between BDLP and BDCP?",
+#     "If I want a University Diploma Certificate, which course should I take and how much does it cost?",
+#     "Compare the teaching philosophy of Ravi Varma with the teaching methodology of Ambika Kiran.",
+#     "Which courses guarantee placement versus just offering placement assistance?",
+#     "What are the specific differences in the final outcomes of the BDDP versus the BDMP programs?",
+
+#     # --- Category 5: Formatting & System Prompt Compliance (Hard) ---
+#     "List all the core modules covered in the curriculum.",
+#     "Name at least 5 AI tools and 3 SEO tools taught in the courses.",
+#     "What are the 6 steps in Ambika Kiran's placement support workflow?",
+#     "Which universities does Digital Brolly collaborate with?",
+#     "Tell me about the BDCP course.",
+
+#     # --- Category 6: Multilingual & Transliteration (Stress Test) ---
+#     "BDCP course duration entha?",
+#     "Mujhe BDMP course ki details batao, fee kitna hai?",
+#     "డిజిటల్ బ్రోల్లీ ఎక్కడ ఉంది?",
+#     "डिजिटल ब्रोली में कौन से कोर्स उपलब्ध हैं?",
+#     "hi hello",
+
+#     # --- Category 7: Out-of-Bounds & Fallback Triggers ---
+#     "Do you offer training in Python Data Science or Full Stack Web Development?",
+#     "What are the exact timings for the weekend offline batches?",
+#     "Can I get a refund if I drop out after 1 month?",
+#     "Who is the CEO of Google?",
+#     "Does Ravi Varma have a degree from IIT?",
+
+#     # --- Category 8: Trick Questions & Logic Traps ---
+#     "Since BDLP has an internship, does it come with a 100% placement guarantee?",
+#     "Is it true that Digital Brolly focuses 80% on theory and 20% on practical implementation?",
+#     "I am looking for a 6-month course that costs ₹50,000 total, which one is that?",
+#     "Does the institute teach advanced coding languages like Java and C++?",
+
+#     # --- Category 9: Semantic Cache Tests (Fresh API calls, no history) ---
+#     # These should be run to check if the 2nd and 3rd return identical answers to the 1st.
+#     "What is the price of the Brolly Digital Marketing Launchpad?",
+#     "How much do I have to pay for the BDLP?",
+#     "BDLP course fee details"
+# ]
+
 TEST_QUESTIONS = [
-    # --- Category 1: Direct Factual Retrieval (Easy) ---
-    "What is the full address of the Digital Brolly headquarters?",
-    "Who is the founder of Digital Brolly?",
-    "How many years of experience does Ravi Varma have?",
-    "What is the total fee for the BDLP program?",
-    "Who is Ambika Kiran and what is her role?",
-    "Does Digital Brolly offer live online training?",
-
-    # --- Category 2: Hybrid Search & Keyword Precision (Testing Sparse/BM25) ---
-    # These test if the bot finds specific tools and award titles exactly.
-    "Who exactly received the Business Icon Award?",
-    "Do you teach WP Hide and Wordfence Security?",
-    "What is the total fee for the BDDP?",  # Harder to distinguish from BDCP/BDLP
-    "Does the Brolly Agency offer services, or is it just a training institute?",
-    "Is there a program that involves a Deemed University?",
-
-    # --- Category 3: Multi-Query Expansion (Testing Vague/Short Queries) ---
-    # These test if your expansion logic understands "lazy" student typing.
-    "cost of career prog",
-    "internship diffs",
-    "tools for ai",
-    "JNTU metro branch details",
-    "ambika placements",
-
-    # --- Category 4: Multi-Hop & Comparative (Medium) ---
-    "What is the exact difference in internship duration and placement support between BDLP and BDCP?",
-    "If I want a University Diploma Certificate, which course should I take and how much does it cost?",
-    "Compare the teaching philosophy of Ravi Varma with the teaching methodology of Ambika Kiran.",
-    "Which courses guarantee placement versus just offering placement assistance?",
-    "What are the specific differences in the final outcomes of the BDDP versus the BDMP programs?",
-
-    # --- Category 5: Formatting & System Prompt Compliance (Hard) ---
-    "List all the core modules covered in the curriculum.",
-    "Name at least 5 AI tools and 3 SEO tools taught in the courses.",
-    "What are the 6 steps in Ambika Kiran's placement support workflow?",
-    "Which universities does Digital Brolly collaborate with?",
-    "Tell me about the BDCP course.",
-
-    # --- Category 6: Multilingual & Transliteration (Stress Test) ---
-    "BDCP course duration entha?",
-    "Mujhe BDMP course ki details batao, fee kitna hai?",
-    "డిజిటల్ బ్రోల్లీ ఎక్కడ ఉంది?",
-    "डिजिटल ब्रोली में कौन से कोर्स उपलब्ध हैं?",
-    "hi hello",
-
-    # --- Category 7: Out-of-Bounds & Fallback Triggers ---
-    "Do you offer training in Python Data Science or Full Stack Web Development?",
-    "What are the exact timings for the weekend offline batches?",
-    "Can I get a refund if I drop out after 1 month?",
-    "Who is the CEO of Google?",
-    "Does Ravi Varma have a degree from IIT?",
-
-    # --- Category 8: Trick Questions & Logic Traps ---
-    "Since BDLP has an internship, does it come with a 100% placement guarantee?",
-    "Is it true that Digital Brolly focuses 80% on theory and 20% on practical implementation?",
-    "I am looking for a 6-month course that costs ₹50,000 total, which one is that?",
-    "Does the institute teach advanced coding languages like Java and C++?",
-
-    # --- Category 9: Semantic Cache Tests (Fresh API calls, no history) ---
-    # These should be run to check if the 2nd and 3rd return identical answers to the 1st.
-    "What is the price of the Brolly Digital Marketing Launchpad?",
-    "How much do I have to pay for the BDLP?",
-    "BDLP course fee details"
+    "address?",
+    "Tell me the location",
+    "location?",
+    "What is the address of the location?",
+    "what is the address?"
 ]
-
 # ── Intermediate Results CSV ──────────────────────────────────────────────────
 INTERMEDIATE_CSV = "rag_intermediate_results.csv"
 FINAL_CSV        = "rag_evaluation_report.csv"
