@@ -71,3 +71,11 @@ logs/
 testing_faqs
 
 torch_wheels/
+
+
+rag_evaluation_report_0.05_version1.csv
+rag_evaluation_report_0.10_version1.csv
+rag_evaluation_report_0.10_version2csv
+rag_evaluation_report_0.25_version1.csv
+rag_evaluation_report_0.25_version2.csv
+rag_intermediate_results.csv

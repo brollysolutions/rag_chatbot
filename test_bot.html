@@ -1052,14 +1052,11 @@ document.getElementById('submit-lead-btn').onclick = async () => {
         });
 
         if (response.ok) {
-            // Mark user verified
             localStorage.setItem('brolly_user_verified', 'true');
             isVerified = true;
             
-            // Hide the overlay
             document.getElementById('lead-overlay').style.display = 'none';
-            
-            // Auto-send original question
+       
             if (pendingMessage) {
                 inputEl.value = pendingMessage;
                 sendMessage(); 
