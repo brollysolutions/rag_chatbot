@@ -13,9 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 
-# Pre-build wheels to speed up final stage installation
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip wheel --no-cache-dir --wheel-dir /app/wheels \
+# Pre-build wheels to speed up final stage installation (BuildKit mount removed)
+RUN pip wheel --no-cache-dir --wheel-dir /app/wheels \
         torch --index-url https://download.pytorch.org/whl/cpu && \
     pip wheel --no-cache-dir --wheel-dir /app/wheels --no-deps ragas && \
     pip wheel --no-cache-dir --wheel-dir /app/wheels \
