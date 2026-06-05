@@ -1,937 +1,826 @@
-<!-- CHATBOT START -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Brolly – AI Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-<div id="chatbot-button">
-  <div style="position:relative; display:inline-block;">
-    <div id="speech-bubble" style="
-      position:absolute; left:-85px; top:-8px;
-      background:#fffbe6; border:1.5px solid #f5c518;
-      border-radius:18px 18px 4px 18px;
-      padding:6px 13px; white-space:nowrap; z-index:2;">
-      <span style="
-        font-size:14px; font-weight:700; font-family:sans-serif;
-        background:linear-gradient(90deg,#f5c518,#b8860b);
-        -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-        background-clip:text;">Hello!</span>
-    </div>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.12);
+      --accent: #6c63ff;
+      --accent2: #a78bfa;
+      --accent-glow: rgba(108,99,255,0.18);
+      --text: #f0f0f5;
+      --muted: #8b8fa8;
+      --success: #22c55e;
+      --teal: #2dd4bf;
+      --coral: #f87171;
+      --amber: #fbbf24;
+      --green: #4ade80;
+      --font-main: 'Sora', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --radius-pill: 999px;
+    }
 
-    <svg viewBox="0 0 80 88" xmlns="http://www.w3.org/2000/svg" width="70" height="80" style="display:block;">
-      <defs>
-        <radialGradient id="headGrad" cx="45%" cy="35%" r="65%">
-          <stop offset="0%"   stop-color="#ffe566"/>
-          <stop offset="55%"  stop-color="#f5c518"/>
-          <stop offset="100%" stop-color="#b8860b"/>
-        </radialGradient>
-        <radialGradient id="bodyGrad" cx="40%" cy="30%" r="70%">
-          <stop offset="0%"   stop-color="#ffd700"/>
-          <stop offset="100%" stop-color="#b8860b"/>
-        </radialGradient>
-        <radialGradient id="armGrad" cx="40%" cy="20%" r="80%">
-          <stop offset="0%"   stop-color="#ffe566"/>
-          <stop offset="100%" stop-color="#d4a017"/>
-        </radialGradient>
-        <radialGradient id="glowEye" cx="50%" cy="50%" r="50%">
-          <stop offset="0%"   stop-color="#ffffff"/>
-          <stop offset="100%" stop-color="#fff8cc" stop-opacity="0.7"/>
-        </radialGradient>
-        <filter id="softGlow">
-          <feGaussianBlur stdDeviation="1.5" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-      <rect x="38" y="4" width="4" height="14" rx="2" fill="#d4a017"/>
-      <circle id="antenna-tip" cx="40" cy="4" r="4" fill="#ffe566" filter="url(#softGlow)"/>
-      <rect x="14" y="16" width="52" height="40" rx="22" fill="url(#headGrad)"/>
-      <ellipse cx="34" cy="22" rx="10" ry="6" fill="white" fill-opacity="0.25" transform="rotate(-15 34 22)"/>
-      <rect x="18" y="24" width="44" height="22" rx="10" fill="#1a1a1a"/>
-      <circle id="eye-l" cx="30" cy="35" r="7.5" fill="url(#glowEye)"/>
-      <circle cx="31" cy="35" r="3.5" fill="#1a1a1a"/>
-      <circle cx="28.5" cy="33" r="1.5" fill="white" fill-opacity="0.9"/>
-      <circle id="eye-r" cx="50" cy="35" r="7.5" fill="url(#glowEye)"/>
-      <circle cx="51" cy="35" r="3.5" fill="#1a1a1a"/>
-      <circle cx="48.5" cy="33" r="1.5" fill="white" fill-opacity="0.9"/>
-      <path d="M30 44 Q40 50 50 44" stroke="#ffe566" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <rect x="22" y="55" width="36" height="22" rx="12" fill="url(#bodyGrad)"/>
-      <ellipse cx="34" cy="60" rx="8" ry="4" fill="white" fill-opacity="0.18" transform="rotate(-10 34 60)"/>
-      <ellipse cx="12" cy="64" rx="6" ry="9" fill="url(#armGrad)" transform="rotate(-20 12 64)"/>
-      <ellipse cx="68" cy="64" rx="6" ry="9" fill="url(#armGrad)" transform="rotate(20 68 64)"/>
-    </svg>
+    html, body { height: 100%; }
 
-    <div id="robot-shadow" style="
-      width:46px; height:9px; margin:0 auto;
-      background:radial-gradient(ellipse, rgba(180,130,0,0.35) 0%, transparent 70%);
-      border-radius:50%;"></div>
-  </div>
-</div>
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
 
-<!-- Chat Window -->
-<div id="chatbot-container">
+    /* Ambient background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -30%;
+      left: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(45,212,191,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .chat-shell {
+      width: 100%;
+      max-width: 740px;
+      height: 100vh;
+      max-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border-left: 0.5px solid var(--border2);
+      border-right: 0.5px solid var(--border2);
+      position: relative;
+    }
+
+    /* ── Header ── */
+    .chat-header {
+      padding: 16px 20px;
+      border-bottom: 0.5px solid var(--border2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .bot-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6c63ff, #2dd4bf);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .bot-avatar svg { width: 20px; height: 20px; }
+    .header-info h2 {
+      font-family: var(--font-main);
+      font-size: 15px; font-weight: 600;
+      color: var(--text);
+    }
+    .header-info .status-row {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12px; color: var(--muted); margin-top: 1px;
+    }
+    .online-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%; background: var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .header-badge {
+      margin-left: auto;
+      font-size: 11px; font-weight: 500;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: var(--accent-glow);
+      color: var(--accent2);
+      border: 0.5px solid rgba(108,99,255,0.3);
+    }
+
+    /* ── Messages area ── */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      scroll-behavior: smooth;
+    }
+    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar-track { background: transparent; }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+    /* ── Message rows ── */
+    .msg-row { display: flex; gap: 10px; align-items: flex-start; animation: fadeUp 0.3s ease; }
+    .msg-row.user { flex-direction: row-reverse; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .av {
+      width: 32px; height: 32px;
+      border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; font-family: var(--font-main);
+    }
+    .av.bot { background: linear-gradient(135deg, #6c63ff, #2dd4bf); }
+    .av.user { background: var(--surface2); color: var(--muted); border: 0.5px solid var(--border2); }
+
+    .user-bubble {
+      background: linear-gradient(135deg, #6c63ff, #7c3aed);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 18px 18px 4px 18px;
+      font-size: 14px; line-height: 1.55;
+      max-width: 70%;
+    }
+
+    .bot-response { max-width: 92%; display: flex; flex-direction: column; gap: 10px; }
+
+    .resp-intro {
+      font-size: 14px; color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── Section cards ── */
+    .s-card {
+      background: var(--surface2);
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .s-head {
+      display: flex; align-items: center; gap: 8px;
+      padding: 11px 14px;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .s-icon {
+      width: 24px; height: 24px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .s-title {
+      font-family: var(--font-main);
+      font-size: 13px; font-weight: 500;
+      color: var(--text);
+    }
+    .s-badge {
+      margin-left: auto;
+      font-size: 11px; font-weight: 500;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+    }
+    .badge-purple { background: rgba(108,99,255,0.15); color: var(--accent2); }
+    .badge-green  { background: rgba(34,197,94,0.12);  color: #4ade80; }
+    .badge-teal   { background: rgba(45,212,191,0.12); color: var(--teal); }
+
+    .s-body { padding: 10px 14px; display: flex; flex-direction: column; gap: 7px; }
+
+    .feat-row {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 13px; color: #cccde0; line-height: 1.55;
+    }
+    .feat-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%; background: var(--accent2);
+      flex-shrink: 0; margin-top: 8px;
+    }
+
+    /* Stats strip */
+    .stats-strip {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--border);
+    }
+    .stat-cell {
+      background: var(--surface2);
+      padding: 12px 10px; text-align: center;
+    }
+    .stat-val {
+      font-family: var(--font-main);
+      font-size: 18px; font-weight: 600;
+      color: var(--text);
+    }
+    .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* Tag cloud */
+    .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px; }
+    .tag {
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      border: 0.5px solid var(--border2);
+      color: var(--muted);
+      background: rgba(255,255,255,0.03);
+    }
+
+    /* Trainer card */
+    .trainer-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px;
+    }
+    .trainer-av {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6c63ff, #2dd4bf);
+      color: #fff;
+      font-family: var(--font-main);
+      font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .trainer-info p { font-size: 14px; font-weight: 500; color: var(--text); }
+    .trainer-info span { font-size: 12px; color: var(--muted); }
+
+    /* Placement list */
+    .placement-list { padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+    .pl-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: #cccde0;
+    }
+    .pl-icon {
+      width: 24px; height: 24px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 13px;
+    }
+
+    /* ── Input area ── */
+    .chat-input-area {
+      padding: 12px 16px;
+      border-top: 0.5px solid var(--border2);
+      display: flex; gap: 10px; align-items: center;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .chat-input-area input {
+      flex: 1;
+      padding: 11px 16px;
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-family: var(--font-body);
+      background: var(--surface2);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .chat-input-area input::placeholder { color: var(--muted); }
+    .chat-input-area input:focus { border-color: rgba(108,99,255,0.5); }
+
+    .send-btn {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6c63ff, #7c3aed);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+    .send-btn:hover { transform: scale(1.06); }
+    .send-btn:active { transform: scale(0.95); }
+    .send-btn svg { width: 16px; height: 16px; }
+
+    /* Loading dots */
+    .typing-indicator { display: flex; gap: 4px; align-items: center; padding: 10px 0; }
+    .typing-indicator span {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--muted);
+      animation: blink 1.2s infinite;
+    }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0.2; transform: scale(0.9); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Error bubble */
+    .err-bubble {
+      font-size: 13px; color: var(--coral);
+      padding: 10px 14px;
+      background: rgba(248,113,113,0.08);
+      border: 0.5px solid rgba(248,113,113,0.2);
+      border-radius: var(--radius-sm);
+    }
+
+    /* Contact strip */
+    .contact-strip {
+      display: flex; flex-direction: column; gap: 6px;
+      padding: 10px 14px;
+    }
+    .contact-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--muted);
+    }
+    .contact-row strong { color: var(--text); }
+
+    /* CTA buttons */
+    .cta-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 16px;
+      border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      font-family: var(--font-main);
+      text-decoration: none;
+      transition: opacity 0.15s, transform 0.15s;
+      cursor: pointer;
+    }
+    .cta-btn:hover { opacity: 0.85; transform: scale(1.01); }
+    .cta-btn:active { transform: scale(0.98); }
+    .cta-call {
+      background: rgba(108,99,255,0.12);
+      color: #a78bfa;
+      border: 0.5px solid rgba(108,99,255,0.25);
+    }
+    .cta-wa {
+      background: rgba(37,211,102,0.12);
+      color: #25d366;
+      border: 0.5px solid rgba(37,211,102,0.25);
+    }
+  </style>
+</head>
+<body>
+<div class="chat-shell">
 
   <!-- Header -->
   <div class="chat-header">
-    <div style="display:flex; align-items:center; gap:8px;">
-      <svg viewBox="0 0 80 88" xmlns="http://www.w3.org/2000/svg" width="28" height="32">
-        <defs>
-          <radialGradient id="hg2" cx="45%" cy="35%" r="65%">
-            <stop offset="0%" stop-color="#ffe566"/>
-            <stop offset="100%" stop-color="#b8860b"/>
-          </radialGradient>
-        </defs>
-        <rect x="38" y="4" width="4" height="12" rx="2" fill="#d4a017"/>
-        <circle cx="40" cy="4" r="3.5" fill="#ffe566"/>
-        <rect x="14" y="16" width="52" height="40" rx="22" fill="url(#hg2)"/>
-        <rect x="18" y="24" width="44" height="22" rx="10" fill="#1a1a1a"/>
-        <circle cx="30" cy="35" r="7" fill="white" fill-opacity="0.92"/>
-        <circle cx="31" cy="35" r="3" fill="#1a1a1a"/>
-        <circle cx="28.5" cy="33" r="1.2" fill="white"/>
-        <circle cx="50" cy="35" r="7" fill="white" fill-opacity="0.92"/>
-        <circle cx="51" cy="35" r="3" fill="#1a1a1a"/>
-        <circle cx="48.5" cy="33" r="1.2" fill="white"/>
-        <path d="M30 44 Q40 50 50 44" stroke="#ffe566" stroke-width="2" fill="none" stroke-linecap="round"/>
-        <rect x="22" y="55" width="36" height="22" rx="12" fill="url(#hg2)"/>
+    <div class="bot-avatar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8">
+        <rect x="3" y="11" width="18" height="10" rx="2"/>
+        <path d="M12 11V7"/><circle cx="12" cy="5" r="2"/>
+        <path d="M8 15h0M16 15h0"/>
       </svg>
-      <div>
-        <div style="font-size:14px; font-weight:600; color:#ffffff; font-family:sans-serif;">AI Assistant</div>
-        <div style="font-size:10px; color:#ffe566; font-family:sans-serif; display:flex; align-items:center; gap:4px;">
-          <span id="online-dot" style="display:inline-block; width:6px; height:6px; background:#ffe566; border-radius:50%;"></span>
-          Online · Ready to help
-        </div>
-      </div>
     </div>
-    <div style="display:flex; align-items:center; gap:10px;">
-      <span style="font-size:11px; font-weight:500; padding:3px 10px; border-radius:999px; background:rgba(245,197,24,0.15); color:#f5c518; border:0.5px solid rgba(245,197,24,0.3); font-family:sans-serif;">RAG Powered</span>
-      <span id="close-btn">✖</span>
+    <div class="header-info">
+      <h2>Digital Brolly Assistant</h2>
+      <div class="status-row"><span class="online-dot"></span> Online · Ready to help</div>
     </div>
+    <div class="header-badge">RAG Powered</div>
   </div>
 
   <!-- Messages -->
-  <div id="chat-body">
-    <!-- Welcome -->
+  <div class="chat-messages" id="messages">
+    <!-- Welcome message -->
     <div class="msg-row">
-      <div class="av-bot">
-        <svg viewBox="0 0 20 20" fill="none" stroke="#1a1a1a" stroke-width="1.6" width="13" height="13">
+      <div class="av bot">
+        <svg viewBox="0 0 20 20" fill="none" stroke="#fff" stroke-width="1.6" width="14" height="14">
           <rect x="2" y="8" width="16" height="9" rx="2"/><path d="M10 8V5"/><circle cx="10" cy="3.5" r="1.5"/>
         </svg>
       </div>
       <div class="bot-response">
-        <div class="resp-intro">Hi! I'm your AI assistant. Ask me anything — fees, schedule, tools, placement support, and more.</div>
+        <div class="resp-intro">Hi! I'm your Digital Brolly assistant. Ask me anything about our digital marketing course — fees, schedule, tools, placement support, and more.</div>
       </div>
     </div>
   </div>
 
   <!-- Input -->
-  <div class="chat-footer">
-    <input id="chat-input" placeholder="Ask something..." autocomplete="off"/>
-    <button id="send-btn">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2.2">
+  <div class="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Ask about fees, schedule, admissions…" autocomplete="off" />
+    <button class="send-btn" onclick="sendMessage()" title="Send">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
         <line x1="22" y1="2" x2="11" y2="13"/>
         <polygon points="22 2 15 22 11 13 2 9 22 2"/>
       </svg>
     </button>
   </div>
+
 </div>
 
-<style>
-/* ── Robot button ── */
-#chatbot-button {
-  position: fixed; bottom: 20px; right: 20px;
-  cursor: pointer; z-index: 999;
-  animation: float 3s ease-in-out infinite;
-}
-#chatbot-button:hover { transform: scale(1.08); }
-@keyframes float {
-  0%,100% { transform: translateY(0); }
-  50%      { transform: translateY(-10px); }
-}
-#robot-shadow { animation: shadow-pulse 3s ease-in-out infinite; }
-@keyframes shadow-pulse {
-  0%,100% { transform: scaleX(1);   opacity: 0.5; }
-  50%      { transform: scaleX(0.6); opacity: 0.2; }
-}
-#speech-bubble { animation: bubble-pop 0.5s ease-out, float 3s ease-in-out infinite; }
-@keyframes bubble-pop {
-  0%  { transform:scale(0); opacity:0; }
-  80% { transform:scale(1.1); }
-  100%{ transform:scale(1);  opacity:1; }
-}
-#antenna-tip { animation: glow 1.5s ease-in-out infinite alternate; }
-@keyframes glow {
-  from { filter: drop-shadow(0 0 2px #ffd700); }
-  to   { filter: drop-shadow(0 0 8px #ffd700) drop-shadow(0 0 14px #f5c518); }
-}
-#eye-l, #eye-r {
-  animation: blink 4s ease-in-out infinite;
-  transform-box: fill-box; transform-origin: center;
-}
-@keyframes blink {
-  0%,90%,100% { transform:scaleY(1); }
-  95%          { transform:scaleY(0.08); }
-}
-#online-dot { animation: dot-pulse 1.5s ease-in-out infinite; }
-@keyframes dot-pulse {
-  0%,100% { opacity:1; }
-  50%      { opacity:0.3; }
-}
-
-/* ── Chat container ── */
-#chatbot-container {
-  position: fixed; bottom: 115px; right: 20px;
-  width: 360px; height: 540px;
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.22);
-  display: none; flex-direction: column;
-  overflow: hidden;
-  border: 1.5px solid #f5c518;
-  font-family: 'DM Sans', sans-serif;
-}
-
-/* Header */
-.chat-header {
-  background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
-  padding: 12px 14px;
-  display: flex; justify-content: space-between; align-items: center;
-  border-bottom: 2px solid #f5c518;
-  flex-shrink: 0;
-}
-#close-btn {
-  cursor: pointer; font-size: 15px; color: #fff;
-  background: rgba(255,255,255,0.12); border-radius: 50%;
-  width: 26px; height: 26px;
-  display: flex; align-items: center; justify-content: center;
-}
-#close-btn:hover { background: rgba(255,255,255,0.25); }
-
-/* Messages area */
-#chat-body {
-  flex: 1; padding: 14px;
-  overflow-y: auto;
-  background: #fafaf7;
-  display: flex; flex-direction: column; gap: 16px;
-  scroll-behavior: smooth;
-}
-#chat-body::-webkit-scrollbar { width: 3px; }
-#chat-body::-webkit-scrollbar-thumb { background: #f5c518; border-radius: 4px; }
-
-/* Message rows */
-.msg-row { display: flex; gap: 8px; align-items: flex-start; animation: fadeUp 0.3s ease; }
-.msg-row.user { flex-direction: row-reverse; }
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(8px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-
-/* Avatars */
-.av-bot {
-  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-  background: linear-gradient(135deg, #ffe566, #f5c518);
-  display: flex; align-items: center; justify-content: center;
-}
-.av-user {
-  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-  background: #1a1a1a; color: #f5c518;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 600; border: 1px solid #f5c518;
-}
-
-/* User bubble */
-.user-bubble {
-  background: #1a1a1a; color: #ffd700;
-  padding: 10px 14px;
-  border-radius: 16px 16px 4px 16px;
-  font-size: 13.5px; line-height: 1.55;
-  max-width: 72%; word-break: break-word;
-}
-
-/* Bot response wrapper */
-.bot-response { max-width: 95%; display: flex; flex-direction: column; gap: 8px; }
-
-/* Intro text */
-.resp-intro {
-  font-size: 13px; color: #555; line-height: 1.6;
-}
-
-/* ── Section cards ── */
-.s-card {
-  background: #ffffff;
-  border: 1px solid #f0e0a0;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 1px 6px rgba(245,197,24,0.1);
-}
-.s-head {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 12px;
-  border-bottom: 1px solid #faeeb0;
-  background: #fffdf0;
-}
-.s-icon {
-  width: 22px; height: 22px; border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.s-title {
-  font-size: 12px; font-weight: 600;
-  color: #1a1a1a; font-family: sans-serif;
-}
-.s-badge {
-  margin-left: auto;
-  font-size: 10px; font-weight: 500;
-  padding: 2px 8px; border-radius: 999px;
-}
-.badge-gold   { background: rgba(245,197,24,0.15); color: #b8860b; border: 0.5px solid rgba(245,197,24,0.4); }
-.badge-black  { background: rgba(26,26,26,0.08);   color: #1a1a1a; border: 0.5px solid rgba(26,26,26,0.2); }
-.badge-green  { background: rgba(34,197,94,0.10);  color: #15803d; border: 0.5px solid rgba(34,197,94,0.25); }
-
-.s-body { padding: 9px 12px; display: flex; flex-direction: column; gap: 6px; }
-
-.feat-row {
-  display: flex; align-items: flex-start; gap: 7px;
-  font-size: 12.5px; color: #333; line-height: 1.55;
-}
-.feat-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: #f5c518; flex-shrink: 0; margin-top: 7px;
-}
-
-/* Stats strip */
-.stats-strip {
-  display: grid; grid-template-columns: repeat(3,1fr);
-  gap: 1px; background: #f0e0a0;
-}
-.stat-cell {
-  background: #fffdf0; padding: 10px 8px; text-align: center;
-}
-.stat-val { font-size: 16px; font-weight: 700; color: #1a1a1a; font-family: sans-serif; }
-.stat-lbl { font-size: 10px; color: #888; margin-top: 2px; }
-
-/* Tags */
-.tag-cloud { display: flex; flex-wrap: wrap; gap: 5px; padding: 8px 12px; }
-.tag {
-  font-size: 11px; padding: 2px 9px;
-  border-radius: 999px;
-  border: 0.5px solid #e8d48a;
-  color: #7a6000; background: #fffbe6;
-}
-
-/* Trainer */
-.trainer-row {
-  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-}
-.trainer-av {
-  width: 38px; height: 38px; border-radius: 50%;
-  background: linear-gradient(135deg, #ffe566, #b8860b);
-  color: #1a1a1a; font-size: 12px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.trainer-info p  { font-size: 13px; font-weight: 600; color: #1a1a1a; }
-.trainer-info span { font-size: 11px; color: #888; }
-
-/* Placement */
-.placement-list { padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
-.pl-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: #333; }
-.pl-icon {
-  width: 20px; height: 20px; border-radius: 5px;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-
-/* Contact card */
-.contact-card { padding: 9px 12px; display: flex; flex-direction: column; gap: 5px; }
-.contact-row { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: #555; }
-.contact-row strong { color: #1a1a1a; }
-
-/* Direct answer highlight */
-.answer-card {
-  background: #fffdf0;
-  border: 1.5px solid #f5c518;
-  border-radius: 12px; overflow: hidden;
-  box-shadow: 0 2px 10px rgba(245,197,24,0.15);
-}
-.answer-head {
-  background: rgba(245,197,24,0.12);
-  padding: 9px 12px; border-bottom: 1px solid #faeeb0;
-  display: flex; align-items: center; gap: 7px;
-}
-.answer-body {
-  padding: 10px 14px;
-  font-size: 13px; color: #1a1a1a; line-height: 1.7;
-}
-
-/* Source hint */
-.source-hint {
-  display: flex; align-items: center; gap: 6px;
-  padding: 5px 2px; font-size: 11px; color: #aaa;
-}
-
-/* Error bubble */
-.err-bubble {
-  font-size: 12.5px; color: #c0392b;
-  padding: 9px 12px;
-  background: rgba(192,57,43,0.06);
-  border: 0.5px solid rgba(192,57,43,0.2);
-  border-radius: 10px;
-}
-
-/* Typing dots */
-.typing-dots { display: flex; gap: 4px; align-items: center; padding: 8px 0; }
-.typing-dots span {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #f5c518;
-  animation: bounce 1.2s infinite;
-}
-.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes bounce {
-  0%,80%,100% { transform:translateY(0);    opacity:0.4; }
-  40%          { transform:translateY(-6px); opacity:1; }
-}
-
-/* Footer */
-.chat-footer {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 12px;
-  border-top: 2px solid #f5c518;
-  background: #fff; flex-shrink: 0;
-}
-#chat-input {
-  flex: 1; padding: 9px 14px;
-  border: 1.5px solid #e8d48a; border-radius: 22px;
-  font-size: 13.5px; font-family: sans-serif;
-  background: #fffdf0; color: #1a1a1a; outline: none;
-  transition: border-color 0.2s, background 0.2s;
-}
-#chat-input:focus { border-color: #f5c518; background: #fff; }
-#chat-input::placeholder { color: #b0a060; }
-#send-btn {
-  width: 36px; height: 36px; border-radius: 50%; border: none;
-  cursor: pointer;
-  background: linear-gradient(135deg, #ffe566, #f5c518);
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 8px rgba(245,197,24,0.4);
-  transition: transform 0.15s, opacity 0.15s;
-}
-#send-btn:hover  { opacity:0.88; transform:scale(1.07); }
-#send-btn:active { transform:scale(0.95); }
-</style>
-
 <script>
-const API_URL = 'https://brollysolutions.in/rag_chatbot/chat';
+  const API_URL = 'https://brollysolutions.in/rag_chatbot/chat';
+  const messagesEl = document.getElementById('messages');
+  const inputEl = document.getElementById('chat-input');
 
-const btn      = document.getElementById("chatbot-button");
-const chat     = document.getElementById("chatbot-container");
-const closeBtn = document.getElementById("close-btn");
-const inputEl  = document.getElementById("chat-input");
-const messagesEl = document.getElementById("chat-body");
-const sendBtn  = document.getElementById("send-btn");
+  inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
 
-btn.onclick = () => {
-  chat.style.display = "flex";
-  document.getElementById("speech-bubble").style.display = "none";
-  inputEl.focus();
-};
-closeBtn.onclick = () => {
-  chat.style.display = "none";
-  document.getElementById("speech-bubble").style.display = "block";
-};
-inputEl.addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
-sendBtn.onclick = sendMessage;
+  // ── Section icon configs ──
+  const SECTION_ICONS = {
+    'course':    { bg: 'rgba(108,99,255,0.18)', stroke: '#a78bfa', path: '<path d="M12 2H4a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="12 2 12 8 18 8"/>' },
+    'training':  { bg: 'rgba(45,212,191,0.15)', stroke: '#2dd4bf', path: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>' },
+    'trainer':   { bg: 'rgba(251,191,36,0.15)', stroke: '#fbbf24', path: '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>' },
+    'placement': { bg: 'rgba(74,222,128,0.15)', stroke: '#4ade80', path: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>' },
+    'unique':    { bg: 'rgba(248,113,113,0.15)', stroke: '#f87171', path: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>' },
+    'tools':     { bg: 'rgba(108,99,255,0.15)', stroke: '#a78bfa', path: '<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>' },
+    'default':   { bg: 'rgba(108,99,255,0.15)', stroke: '#a78bfa', path: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>' },
+  };
 
-// ── Icon configs (gold/black theme) ──
-const SECTION_ICONS = {
-  course:    { bg:'rgba(245,197,24,0.15)', stroke:'#b8860b', path:'<path d="M12 2H4a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="12 2 12 8 18 8"/>' },
-  training:  { bg:'rgba(26,26,26,0.08)',   stroke:'#1a1a1a', path:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>' },
-  trainer:   { bg:'rgba(245,197,24,0.18)', stroke:'#d4a017', path:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>' },
-  placement: { bg:'rgba(34,197,94,0.12)',  stroke:'#15803d', path:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>' },
-  unique:    { bg:'rgba(245,197,24,0.12)', stroke:'#f5c518', path:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>' },
-  tools:     { bg:'rgba(26,26,26,0.08)',   stroke:'#444',    path:'<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>' },
-  default:   { bg:'rgba(245,197,24,0.12)', stroke:'#b8860b', path:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>' },
-};
-
-function iconFor(title) {
-  const t = title.toLowerCase();
-  if (t.includes('course') || t.includes('content') || t.includes('module')) return SECTION_ICONS.course;
-  if (t.includes('train') && t.includes('approach')) return SECTION_ICONS.training;
-  if (t.includes('trainer') || t.includes('expert') || t.includes('profile')) return SECTION_ICONS.trainer;
-  if (t.includes('placement') || t.includes('career')) return SECTION_ICONS.placement;
-  if (t.includes('unique') || t.includes('feature')) return SECTION_ICONS.unique;
-  if (t.includes('tool')) return SECTION_ICONS.tools;
-  return SECTION_ICONS.default;
-}
-
-function svgIcon(cfg) {
-  return `<svg viewBox="0 0 24 24" fill="none" stroke="${cfg.stroke}" stroke-width="1.8" width="13" height="13">${cfg.path}</svg>`;
-}
-
-function cleanMd(text) {
-  return text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').trim();
-}
-function stripMd(text) {
-  return text.replace(/\*\*([^*]+)\*\*/g, '$1').trim();
-}
-function splitBullets(body) {
-  return body.split(/[•\n]\s*|\.\s+(?=[A-Z])/)
-    .map(s => stripMd(s).trim()).filter(s => s.length > 4);
-}
-
-function parseSections(rawText) {
-  const text = rawText.trim();
-  const fmtA = /(\d+)\.\s+\*\*([^*]+)\*\*[:\s\u2014-]*([\s\S]*?)(?=\d+\.\s+\*\*|$)/g;
-  const sectionsA = [];
-  let m;
-  while ((m = fmtA.exec(text)) !== null) {
-    const title = m[2].replace(/:$/, '').trim();
-    const body  = m[3].trim();
-    const bullets = body.split(/\n?\s*[-•]\s+/).filter(b => b.trim().length > 3).map(b => stripMd(b));
-    if (bullets.length === 0 && body.length > 3) bullets.push(stripMd(body));
-    sectionsA.push({ title, bullets });
+  function iconFor(title) {
+    const t = title.toLowerCase();
+    if (t.includes('course') || t.includes('content') || t.includes('module')) return SECTION_ICONS.course;
+    if (t.includes('train') && t.includes('approach')) return SECTION_ICONS.training;
+    if (t.includes('trainer') || t.includes('expert')) return SECTION_ICONS.trainer;
+    if (t.includes('placement') || t.includes('career')) return SECTION_ICONS.placement;
+    if (t.includes('unique') || t.includes('feature')) return SECTION_ICONS.unique;
+    if (t.includes('tool')) return SECTION_ICONS.tools;
+    return SECTION_ICONS.default;
   }
-  if (sectionsA.length >= 2) return { format: 'sections', sections: sectionsA };
 
-  const fmtB = /(?:\d+\.\s+)?([A-Za-z ]+?)\s*[—\-–:]\s*([\s\S]*?)(?=(?:\d+\.\s+)?[A-Za-z ]+?\s*[—\-–:]|$)/g;
-  const sectionsB = [];
-  const knownLabels = ['direct answer','details','source hint','summary','answer','explanation','note','key trainer','profile','primary role','responsibilities','approach'];
-  while ((m = fmtB.exec(text)) !== null) {
-    const label = m[1].trim();
-    const body  = m[2].trim();
-    if (!label || body.length < 3) continue;
-    const isKnown = knownLabels.some(k => label.toLowerCase().includes(k));
-    if (isKnown || label.length < 30) {
-      const bullets = splitBullets(body);
-      sectionsB.push({ title: label, bullets, raw: body });
+  function svgIcon(cfg) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="${cfg.stroke}" stroke-width="1.8" width="13" height="13">${cfg.path}</svg>`;
+  }
+
+  // ── Clean markdown bold/italic from text ──
+  function cleanMd(text) {
+    return text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').trim();
+  }
+  function stripMd(text) {
+    return text.replace(/\*\*([^*]+)\*\*/g, '$1').trim();
+  }
+
+  // ── Split body text into bullet array ──
+  function splitBullets(body) {
+    // Split on: "• item", "- item", or ". item" after bold keyword
+    return body
+      .split(/[•\n]\s*|\.\s+(?=[A-Z])/)
+      .map(s => stripMd(s).trim())
+      .filter(s => s.length > 4);
+  }
+
+  // ── Detect response format and parse into sections ──
+  function parseSections(rawText) {
+    const text = rawText.trim();
+
+    // ── FORMAT A: "1. **Title:** ..." numbered sections ──
+    const fmtA = /(\d+)\.\s+\*\*([^*]+)\*\*[:\s\u2014-]*([\s\S]*?)(?=\d+\.\s+\*\*|$)/g;
+    const sectionsA = [];
+    let m;
+    while ((m = fmtA.exec(text)) !== null) {
+      const title = m[2].replace(/:$/, '').trim();
+      const body  = m[3].trim();
+      const bullets = body.split(/\n?\s*[-•]\s+/).filter(b => b.trim().length > 3).map(b => stripMd(b));
+      if (bullets.length === 0 && body.length > 3) bullets.push(stripMd(body));
+      sectionsA.push({ title, bullets });
     }
-  }
-  const noiseLabels = ['call','whatsapp','phone','contact'];
-  const filteredB = sectionsB.filter(s => !noiseLabels.some(n => s.title.toLowerCase().trim() === n));
-  if (filteredB.length >= 1) return { format: 'qa', sections: filteredB };
-  return { format: 'plain', text };
-}
+    if (sectionsA.length >= 2) return { format: 'sections', sections: sectionsA };
 
-function extractStats(bullets) {
-  const statsFound = [];
-  const patterns = [
-    { re:/(\d+\+?\s*modules?)/i,  label:'Modules' },
-    { re:/(\d+\+?\s*topics?)/i,   label:'Topics' },
-    { re:/(\d+\+?\s*tools?)/i,    label:'Tools' },
-    { re:/(\d+\s*days?)/i,        label:'Days access' },
-    { re:/(\d+\+?\s*years?)/i,    label:'Experience' },
-  ];
-  for (const p of patterns) {
+    // ── FORMAT B: "Direct Answer — ..." / "Details — ..." / "Source Hint — ..." ──
+    // Also handles: "1. Direct Answer — ..." style
+    const fmtB = /(?:\d+\.\s+)?([A-Za-z ]+?)\s*[—\-–:]\s*([\s\S]*?)(?=(?:\d+\.\s+)?[A-Za-z ]+?\s*[—\-–:]|$)/g;
+    const sectionsB = [];
+    const knownLabels = ['direct answer', 'details', 'source hint', 'summary', 'answer', 'explanation', 'note'];
+    while ((m = fmtB.exec(text)) !== null) {
+      const label = m[1].trim();
+      const body  = m[2].trim();
+      if (!label || body.length < 3) continue;
+      const isKnown = knownLabels.some(k => label.toLowerCase().includes(k));
+      if (isKnown || label.length < 30) {
+        const bullets = splitBullets(body);
+        sectionsB.push({ title: label, bullets, raw: body });
+      }
+    }
+    // Remove noise sections like bare "Call" / "WhatsApp" (contact info handled separately)
+    const noiseLabels = ['call', 'whatsapp', 'phone', 'contact'];
+    const filteredB = sectionsB.filter(s => !noiseLabels.some(n => s.title.toLowerCase().trim() === n));
+    if (filteredB.length >= 1) return { format: 'qa', sections: filteredB };
+
+    // ── FORMAT C: Plain text fallback ──
+    return { format: 'plain', text };
+  }
+
+  // ── Detect known keywords in text for special rendering ──
+  function extractStats(bullets) {
+    // Look for numbers: 35+ modules, 600+ topics, 50+ tools
+    const statsFound = [];
+    const patterns = [
+      { re: /(\d+\+?\s*modules?)/i,  label: 'Modules' },
+      { re: /(\d+\+?\s*topics?)/i,   label: 'Topics' },
+      { re: /(\d+\+?\s*tools?)/i,    label: 'Tools' },
+      { re: /(\d+\s*days?)/i,        label: 'Days access' },
+      { re: /(\d+\+?\s*years?)/i,    label: 'Experience' },
+    ];
+    for (const p of patterns) {
+      for (const b of bullets) {
+        const m = b.match(p.re);
+        if (m && statsFound.length < 3) {
+          statsFound.push({ val: m[1].trim(), lbl: p.label });
+        }
+      }
+    }
+    return statsFound;
+  }
+
+  function extractTools(bullets) {
+    const tools = [];
+    const toolKeywords = ['SEO', 'Google Ads', 'ChatGPT', 'AI tools', 'analytics', 'Canva', 'WordPress', 'Social Media', 'content', 'design tools'];
     for (const b of bullets) {
-      const m = b.match(p.re);
-      if (m && statsFound.length < 3) statsFound.push({ val: m[1].trim(), lbl: p.label });
+      for (const kw of toolKeywords) {
+        if (b.toLowerCase().includes(kw.toLowerCase()) && !tools.includes(kw)) {
+          tools.push(kw);
+        }
+      }
     }
+    return tools.slice(0, 8);
   }
-  return statsFound;
-}
 
-function extractTools(bullets) {
-  const tools = [];
-  const kws = ['SEO','Google Ads','ChatGPT','AI tools','Analytics','Canva','WordPress','Social Media','Content','Design tools'];
-  for (const b of bullets)
-    for (const kw of kws)
-      if (b.toLowerCase().includes(kw.toLowerCase()) && !tools.includes(kw)) tools.push(kw);
-  return tools.slice(0, 8);
-}
-
-function extractTrainer(bullets) {
-  for (const b of bullets) {
-    const m = b.match(/([A-Z][a-z]+ [A-Z][a-z]+)[,\s].*?(\d+\+?\s*years?)/i);
-    if (m) return { name: m[1], exp: m[2] };
+  function extractTrainer(bullets) {
+    for (const b of bullets) {
+      const m = b.match(/([A-Z][a-z]+ [A-Z][a-z]+)[,\s].*?(\d+\+?\s*years?)/i);
+      if (m) return { name: m[1], exp: m[2] };
+    }
+    return null;
   }
-  return null;
-}
 
-function buildSectionCard(section) {
-  const icon = iconFor(section.title);
-  const tl = section.title.toLowerCase();
+  // ── Build a single section card HTML ──
+  function buildSectionCard(section) {
+    const icon = iconFor(section.title);
+    const tl = section.title.toLowerCase();
 
-  if (tl.includes('placement') || tl.includes('career')) {
-    const items = section.bullets.map(b => `
-      <div class="pl-item">
-        <div class="pl-icon" style="background:rgba(34,197,94,0.10);">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2">
-            <polyline points="20 6 9 17 4 12"/>
+    // Placement section
+    if (tl.includes('placement') || tl.includes('career')) {
+      const items = section.bullets.map(b => `
+        <div class="pl-item">
+          <div class="pl-icon" style="background:rgba(74,222,128,0.12);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          ${b}
+        </div>`).join('');
+      return `
+      <div class="s-card">
+        <div class="s-head">
+          <div class="s-icon" style="background:${icon.bg};">${svgIcon(icon)}</div>
+          <span class="s-title">${section.title}</span>
+          <span class="s-badge badge-green" style="margin-left:auto;">100% support</span>
+        </div>
+        <div class="placement-list">${items}</div>
+      </div>`;
+    }
+
+    // Course / content section — show stats + tags
+    if (tl.includes('course') || tl.includes('content') || tl.includes('module')) {
+      const stats = extractStats(section.bullets);
+      const tools = extractTools(section.bullets);
+      const statsHtml = stats.length ? `
+        <div class="stats-strip">
+          ${stats.map(s => `<div class="stat-cell"><div class="stat-val">${s.val}</div><div class="stat-lbl">${s.lbl}</div></div>`).join('')}
+        </div>` : '';
+      const tagsHtml = tools.length ? `<div class="tag-cloud">${tools.map(t => `<span class="tag">${t}</span>`).join('')}</div>` : '';
+      return `
+      <div class="s-card">
+        <div class="s-head">
+          <div class="s-icon" style="background:${icon.bg};">${svgIcon(icon)}</div>
+          <span class="s-title">${section.title}</span>
+          <span class="s-badge badge-purple" style="margin-left:auto;">35+ modules</span>
+        </div>
+        ${statsHtml}${tagsHtml}
+      </div>`;
+    }
+
+    // Trainer section
+    if (tl.includes('trainer') || tl.includes('expert')) {
+      const trainer = extractTrainer(section.bullets);
+      const trainerHtml = trainer ? `
+        <div class="trainer-row">
+          <div class="trainer-av">${trainer.name.split(' ').map(w=>w[0]).join('')}</div>
+          <div class="trainer-info">
+            <p>${trainer.name}</p>
+            <span>${trainer.exp} experience · SEO, Google Ads, Social Media, WordPress, Canva</span>
+          </div>
+        </div>` : `<div class="s-body">${section.bullets.map(b=>`<div class="feat-row"><span class="feat-dot"></span>${b}</div>`).join('')}</div>`;
+      return `
+      <div class="s-card">
+        <div class="s-head">
+          <div class="s-icon" style="background:${icon.bg};">${svgIcon(icon)}</div>
+          <span class="s-title">${section.title}</span>
+        </div>
+        ${trainerHtml}
+      </div>`;
+    }
+
+    // Default section — bullet list
+    const bullets = section.bullets.map(b => `<div class="feat-row"><span class="feat-dot"></span>${b}</div>`).join('');
+    return `
+    <div class="s-card">
+      <div class="s-head">
+        <div class="s-icon" style="background:${icon.bg};">${svgIcon(icon)}</div>
+        <span class="s-title">${section.title}</span>
+      </div>
+      <div class="s-body">${bullets}</div>
+    </div>`;
+  }
+
+  // ── Build contact info card ──
+  function buildContactCard(contactInfo) {
+    if (!contactInfo) return '';
+    const phones = (contactInfo.phone_numbers || []).join(', ');
+    const wa = contactInfo.whatsapp || '';
+    return `
+    <div class="s-card" style="margin-top:4px;">
+      <div class="s-head">
+        <div class="s-icon" style="background:rgba(45,212,191,0.15);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" stroke-width="1.8">
+            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8a19.79 19.79 0 01-3.07-8.68A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
           </svg>
-        </div>${b}
-      </div>`).join('');
-    return `<div class="s-card">
-      <div class="s-head">
-        <div class="s-icon" style="background:${icon.bg};">${svgIcon(icon)}</div>
-        <span class="s-title">${section.title}</span>
-        <span class="s-badge badge-green" style="margin-left:auto;">100% support</span>
+        </div>
+        <span class="s-title">Contact us</span>
       </div>
-      <div class="placement-list">${items}</div>
+      <div class="contact-strip">
+        ${phones ? `<div class="contact-row"><strong>Phone:</strong> ${phones}</div>` : ''}
+        ${wa    ? `<div class="contact-row"><strong>WhatsApp:</strong> ${wa}</div>` : ''}
+      </div>
     </div>`;
   }
 
-  if (tl.includes('course') || tl.includes('content') || tl.includes('module')) {
-    const stats = extractStats(section.bullets);
-    const tools = extractTools(section.bullets);
-    const statsHtml = stats.length ? `<div class="stats-strip">${stats.map(s=>`<div class="stat-cell"><div class="stat-val">${s.val}</div><div class="stat-lbl">${s.lbl}</div></div>`).join('')}</div>` : '';
-    const tagsHtml  = tools.length ? `<div class="tag-cloud">${tools.map(t=>`<span class="tag">${t}</span>`).join('')}</div>` : '';
-    return `<div class="s-card">
-      <div class="s-head">
-        <div class="s-icon" style="background:${icon.bg};">${svgIcon(icon)}</div>
-        <span class="s-title">${section.title}</span>
-        <span class="s-badge badge-gold" style="margin-left:auto;">35+ modules</span>
-      </div>${statsHtml}${tagsHtml}
-    </div>`;
-  }
+  // ── Build QA-format card (Direct Answer / Details / Source Hint) ──
+  function buildQACard(section) {
+    const tl = section.title.toLowerCase();
+    let iconCfg, bg, badge = '';
 
-  if (tl.includes('trainer') || tl.includes('expert') || tl.includes('key trainer')) {
-    // Extract trainer name from section body
-    const rawFull = section.raw || section.bullets.join('\n');
-    const nameMatch = rawFull.match(/Name[:\s]+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/i);
-    const trainerName = nameMatch ? nameMatch[1] : 'Trainer';
-    
-    // Extract subsections (Primary Role, Core Responsibilities, Training Approach)
-    const subsections = [];
-    const roleMatch = rawFull.match(/Primary Role[:\s]+([\s\S]*?)(?=Core Responsibilities|Training Approach|$)/i);
-    const respMatch = rawFull.match(/Core Responsibilities[:\s]+([\s\S]*?)(?=Training Approach|$)/i);
-    const approachMatch = rawFull.match(/Training Approach[:\s]+([\s\S]*?)(?=source|$)/i);
-    
-    if (roleMatch) {
-      const roles = roleMatch[1]
-        .split(/[-•\n]/)
-        .map(r => stripMd(r).trim())
-        .filter(r => r.length > 0 && !r.toLowerCase().includes('focus on'));
-      if (roles.length > 0) {
-        subsections.push({ title: 'Roles', items: roles.slice(0, 3) });
-      }
+    if (tl.includes('direct answer') || tl.includes('answer')) {
+      iconCfg = { bg: 'rgba(108,99,255,0.18)', stroke: '#a78bfa', path: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>' };
+      badge = `<span class="s-badge badge-purple" style="margin-left:auto;">Answer</span>`;
+    } else if (tl.includes('detail')) {
+      iconCfg = { bg: 'rgba(45,212,191,0.15)', stroke: '#2dd4bf', path: '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>' };
+      badge = `<span class="s-badge badge-teal" style="margin-left:auto;">Details</span>`;
+    } else if (tl.includes('source')) {
+      iconCfg = { bg: 'rgba(251,191,36,0.12)', stroke: '#fbbf24', path: '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>' };
+      badge = `<span class="s-badge" style="margin-left:auto;background:rgba(251,191,36,0.12);color:#fbbf24;">Source</span>`;
+    } else {
+      iconCfg = SECTION_ICONS.default;
     }
-    
-    if (respMatch) {
-      const resp = respMatch[1]
-        .split(/[-•\n]/)
-        .map(r => stripMd(r).trim())
-        .filter(r => r.length > 3);
-      if (resp.length > 0) {
-        subsections.push({ title: 'Responsibilities', items: resp });
-      }
+
+    // For "direct answer" render as a highlighted answer box
+    if (tl.includes('direct answer') || tl.includes('answer')) {
+      const bodyText = section.raw || section.bullets.join(' ');
+      // Split on bullet chars
+      const lines = bodyText.split(/[•]/).map(s => stripMd(s).trim()).filter(s => s.length > 3);
+      const inner = lines.length > 1
+        ? lines.map(l => `<div class="feat-row"><span class="feat-dot" style="background:#a78bfa;"></span>${l}</div>`).join('')
+        : `<div style="font-size:14px;color:var(--text);line-height:1.65;">${cleanMd(bodyText)}</div>`;
+      return `
+      <div class="s-card" style="border-color:rgba(108,99,255,0.3);">
+        <div class="s-head" style="background:rgba(108,99,255,0.07);">
+          <div class="s-icon" style="background:${iconCfg.bg};">${svgIcon(iconCfg)}</div>
+          <span class="s-title">Direct answer</span>
+          ${badge}
+        </div>
+        <div class="s-body">${inner}</div>
+      </div>`;
     }
-    
-    if (approachMatch) {
-      const approach = approachMatch[1]
-        .split(/[-•\n]/)
-        .map(a => stripMd(a).trim())
-        .filter(a => a.length > 3);
-      if (approach.length > 0) {
-        subsections.push({ title: 'Approach', items: approach });
-      }
+
+    // Details section
+    if (tl.includes('detail')) {
+      const lines = (section.raw || section.bullets.join('\n')).split(/[-•]/).map(s => stripMd(s).trim()).filter(s => s.length > 4);
+      const inner = lines.map(l => `<div class="feat-row"><span class="feat-dot" style="background:#2dd4bf;"></span>${l}</div>`).join('');
+      return `
+      <div class="s-card">
+        <div class="s-head">
+          <div class="s-icon" style="background:${iconCfg.bg};">${svgIcon(iconCfg)}</div>
+          <span class="s-title">More details</span>
+          ${badge}
+        </div>
+        <div class="s-body">${inner}</div>
+      </div>`;
     }
-    
-    const initials = trainerName.split(' ').map(w => w[0]).join('').toUpperCase();
-    const subsectionsHtml = subsections.map(sub => `
-      <div style="padding:8px 0; border-bottom:1px solid #f0e0a0;">
-        <div style="font-size:11px; color:#888; margin-bottom:6px; font-weight:600; text-transform:uppercase;">${sub.title}</div>
-        <div style="display:flex; flex-direction:column; gap:4px;">
-          ${sub.items.map(item => `
-            <div style="display:flex; align-items:flex-start; gap:6px; font-size:12.5px; color:#333; line-height:1.5;">
-              <span style="width:5px; height:5px; background:#f5c518; border-radius:50%; margin-top:6px; flex-shrink:0;"></span>
-              <span>${item}</span>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `).join('');
-    
-    return `<div class="s-card">
+
+    // Source hint section — small muted footer style
+    if (tl.includes('source')) {
+      const src = stripMd(section.raw || section.bullets.join(' '));
+      return `
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 4px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.8">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <span style="font-size:12px;color:var(--muted);">${src}</span>
+      </div>`;
+    }
+
+    // Generic fallback card
+    const inner = section.bullets.map(b => `<div class="feat-row"><span class="feat-dot"></span>${b}</div>`).join('');
+    return `
+    <div class="s-card">
       <div class="s-head">
-        <div class="s-icon" style="background:${icon.bg};">${svgIcon(icon)}</div>
-        <span class="s-title">${section.title}</span>
-        <span class="s-badge badge-gold">Expert</span>
-      </div>
-      <div style="padding:12px;">
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid #f0e0a0;">
-          <div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#ffe566,#b8860b); display:flex; align-items:center; justify-content:center; color:#1a1a1a; font-weight:700; font-size:14px; flex-shrink:0;">${initials}</div>
-          <div>
-            <div style="font-size:14px; font-weight:600; color:#1a1a1a;">${trainerName}</div>
-            <div style="font-size:11px; color:#888;">Digital Marketing Professional</div>
-          </div>
-        </div>
-        ${subsectionsHtml || '<div style="color:#888; font-size:12px;">Professional trainer with industry expertise</div>'}
-      </div>
-    </div>`;
-  }
-
-  const bullets = section.bullets.map(b=>`<div class="feat-row"><span class="feat-dot"></span>${b}</div>`).join('');
-  return `<div class="s-card">
-    <div class="s-head">
-      <div class="s-icon" style="background:${icon.bg};">${svgIcon(icon)}</div>
-      <span class="s-title">${section.title}</span>
-    </div>
-    <div class="s-body">${bullets}</div>
-  </div>`;
-}
-
-function buildContactCard(ci) {
-  if (!ci) return '';
-  
-  const phoneLinks = ci.phone_links || [];
-  
-  // Fallback: if phone_links is empty, create from primary_phone and whatsapp_number
-  if (phoneLinks.length === 0 && (ci.primary_phone || ci.whatsapp_number)) {
-    const primary = ci.primary_phone || ci.whatsapp_number;
-    const phoneClean = primary.replace(/[^0-9]/g, '');
-    phoneLinks.push({
-      number: primary,
-      call_link: `tel:${primary}`,
-      whatsapp_link: `https://wa.me/${phoneClean}`
-    });
-  }
-  
-  // Build phone links with icons
-  const phoneIconsHtml = phoneLinks.length > 0 
-    ? phoneLinks.map((pl, idx) => `
-      <a href="${pl.call_link}" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; padding:8px 12px; background:rgba(245,197,24,0.12); border:1px solid rgba(245,197,24,0.3); border-radius:10px; margin-right:6px; margin-bottom:6px; color:#1a1a1a; font-size:12px; font-weight:500; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(245,197,24,0.2)'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='rgba(245,197,24,0.12)'; this.style.transform='scale(1)'">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8a19.79 19.79 0 01-3.07-8.68A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
-        </svg>
-        <span>${pl.number}</span>
-      </a>
-    `).join('')
-    : '';
-  
-  // Build WhatsApp links
-  const whatsappLinksHtml = phoneLinks.length > 0
-    ? phoneLinks.map((pl, idx) => `
-      <a href="${pl.whatsapp_link}" target="_blank" rel="noopener noreferrer" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; padding:8px 12px; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); border-radius:10px; margin-right:6px; margin-bottom:6px; color:#15803d; font-size:12px; font-weight:500; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(34,197,94,0.2)'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='rgba(34,197,94,0.12)'; this.style.transform='scale(1)'">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.272-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004c-1.537 0-2.852-.727-2.852-1.616 0-.89 1.315-1.617 2.852-1.617 1.537 0 2.853.727 2.853 1.617 0 .889-1.316 1.616-2.853 1.616"/>
-        </svg>
-        <span>WhatsApp</span>
-      </a>
-    `).join('')
-    : '';
-  
-  return `<div class="s-card">
-    <div class="s-head">
-      <div class="s-icon" style="background:rgba(245,197,24,0.15);">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b8860b" stroke-width="1.8">
-          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8a19.79 19.79 0 01-3.07-8.68A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.16 6.16l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
-        </svg>
-      </div>
-      <span class="s-title">Contact us</span>
-    </div>
-    <div class="contact-card" style="padding:12px;">
-      ${phoneLinks.length > 0 ? `
-        <div style="padding:8px 0; margin-bottom:10px;">
-          <div style="font-size:11px; color:#888; margin-bottom:8px; font-weight:600; text-transform:uppercase;">📞 Call</div>
-          <div style="display:flex; flex-wrap:wrap; gap:6px;">
-            ${phoneIconsHtml}
-          </div>
-        </div>
-        <div style="padding:8px 0; border-top:1px solid #f0e0a0;">
-          <div style="font-size:11px; color:#888; margin-bottom:8px; margin-top:8px; font-weight:600; text-transform:uppercase;">💬 WhatsApp</div>
-          <div style="display:flex; flex-wrap:wrap; gap:6px;">
-            ${whatsappLinksHtml}
-          </div>
-        </div>
-      ` : '<div style="color:#888; font-size:12px;">Click phone or WhatsApp above to contact us</div>'}
-    </div>
-  </div>`;
-}
-
-function buildQACard(section) {
-  const tl = section.title.toLowerCase();
-
-  if (tl.includes('direct answer') || tl.includes('answer')) {
-    const bodyText = section.raw || section.bullets.join(' ');
-    const lines = bodyText.split(/[•]/).map(s=>stripMd(s).trim()).filter(s=>s.length>3);
-    const inner = lines.length > 1
-      ? lines.map(l=>`<div class="feat-row"><span class="feat-dot"></span>${l}</div>`).join('')
-      : `<div style="font-size:13px;color:#1a1a1a;line-height:1.7;">${cleanMd(bodyText)}</div>`;
-    return `<div class="answer-card">
-      <div class="answer-head">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b8860b" stroke-width="1.8">
-          <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
-        </svg>
-        <span class="s-title">Answer</span>
-        <span class="s-badge badge-gold" style="margin-left:auto;">Direct</span>
-      </div>
-      <div class="answer-body">${inner}</div>
-    </div>`;
-  }
-
-  if (tl.includes('detail')) {
-    const lines = (section.raw || section.bullets.join('\n')).split(/[-•]/).map(s=>stripMd(s).trim()).filter(s=>s.length>4);
-    const inner = lines.map(l=>`<div class="feat-row"><span class="feat-dot"></span>${l}</div>`).join('');
-    return `<div class="s-card">
-      <div class="s-head">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b8860b" stroke-width="1.8" style="flex-shrink:0;">
-          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
-          <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
-          <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
-        </svg>
-        <span class="s-title">More details</span>
-        <span class="s-badge badge-black" style="margin-left:auto;">Details</span>
+        <div class="s-icon" style="background:${iconCfg.bg};">${svgIcon(iconCfg)}</div>
+        <span class="s-title">${section.title}</span>${badge}
       </div>
       <div class="s-body">${inner}</div>
     </div>`;
   }
 
-  if (tl.includes('source')) {
-    // Don't display source hint to keep data sources private
-    return '';
-  }
+  // ── Render full bot message ──
+  function renderBotMessage(data) {
+    const parsed = parseSections(data.answer);
+    let html = '';
 
-  const inner = section.bullets.map(b=>`<div class="feat-row"><span class="feat-dot"></span>${b}</div>`).join('');
-  return `<div class="s-card">
-    <div class="s-head">
-      <div class="s-icon" style="background:rgba(245,197,24,0.12);">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b8860b" stroke-width="1.8">
-          <circle cx="12" cy="12" r="10"/>
+    if (parsed.format === 'plain') {
+      html = `<div class="resp-intro" style="color:var(--text);font-size:14px;line-height:1.7;">${cleanMd(parsed.text)}</div>`;
+
+    } else if (parsed.format === 'qa') {
+      // QA format: Direct Answer / Details / Source Hint
+      html += parsed.sections.map(buildQACard).join('');
+
+    } else {
+      // Sections format: numbered course info
+      html = `<div class="resp-intro">Here's what I found about <strong style="color:var(--text);">Digital Brolly's Digital Marketing program:</strong></div>`;
+      html += parsed.sections.map(buildSectionCard).join('');
+    }
+
+    if (data.contact_info) html += buildContactCard(data.contact_info);
+    html += `<div class="resp-intro" style="font-size:12px;margin-top:4px;">Need more details? Ask me anything!</div>`;
+
+    const row = document.createElement('div');
+    row.className = 'msg-row';
+    row.innerHTML = `
+      <div class="av bot">
+        <svg viewBox="0 0 20 20" fill="none" stroke="#fff" stroke-width="1.6" width="14" height="14">
+          <rect x="2" y="8" width="16" height="9" rx="2"/><path d="M10 8V5"/><circle cx="10" cy="3.5" r="1.5"/>
         </svg>
       </div>
-      <span class="s-title">${section.title}</span>
-    </div>
-    <div class="s-body">${inner}</div>
-  </div>`;
-}
-
-function renderBotMessage(data) {
-  const parsed = parseSections(data.answer);
-  let html = '';
-
-  if (parsed.format === 'plain') {
-    html = `<div class="answer-card">
-      <div class="answer-body">${cleanMd(parsed.text)}</div>
-    </div>`;
-  } else if (parsed.format === 'qa') {
-    html = parsed.sections.map(buildQACard).join('');
-  } else {
-    html = `<div class="resp-intro">Here's what I found:</div>`;
-    html += parsed.sections.map(buildSectionCard).join('');
+      <div class="bot-response">${html}</div>`;
+    return row;
   }
 
-  if (data.contact_info) html += buildContactCard(data.contact_info);
-  html += `<div class="resp-intro" style="font-size:11px;color:#aaa;margin-top:2px;">Need more info? Ask me anything!</div>`;
+  // ── Send message ──
+  async function sendMessage() {
+    const message = inputEl.value.trim();
+    if (!message) return;
+    inputEl.value = '';
 
-  const row = document.createElement('div');
-  row.className = 'msg-row';
-  row.innerHTML = `
-    <div class="av-bot">
-      <svg viewBox="0 0 20 20" fill="none" stroke="#1a1a1a" stroke-width="1.6" width="13" height="13">
-        <rect x="2" y="8" width="16" height="9" rx="2"/><path d="M10 8V5"/><circle cx="10" cy="3.5" r="1.5"/>
-      </svg>
-    </div>
-    <div class="bot-response">${html}</div>`;
-  return row;
-}
+    // User bubble
+    const userRow = document.createElement('div');
+    userRow.className = 'msg-row user';
+    userRow.innerHTML = `
+      <div class="av user">You</div>
+      <div class="user-bubble">${message}</div>`;
+    messagesEl.appendChild(userRow);
 
-async function sendMessage() {
-  const message = inputEl.value.trim();
-  if (!message) return;
-  inputEl.value = '';
-
-  const userRow = document.createElement('div');
-  userRow.className = 'msg-row user';
-  userRow.innerHTML = `<div class="av-user">You</div><div class="user-bubble">${message}</div>`;
-  messagesEl.appendChild(userRow);
-
-  const typingRow = document.createElement('div');
-  typingRow.className = 'msg-row';
-  typingRow.innerHTML = `
-    <div class="av-bot">
-      <svg viewBox="0 0 20 20" fill="none" stroke="#1a1a1a" stroke-width="1.6" width="13" height="13">
-        <rect x="2" y="8" width="16" height="9" rx="2"/><path d="M10 8V5"/><circle cx="10" cy="3.5" r="1.5"/>
-      </svg>
-    </div>
-    <div class="bot-response">
-      <div class="typing-dots"><span></span><span></span><span></span></div>
-    </div>`;
-  messagesEl.appendChild(typingRow);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message })     // ✅ your backend field
-    });
-    const data = await response.json();
-    typingRow.remove();
-    messagesEl.appendChild(renderBotMessage(data));   // ✅ reads data.answer
-  } catch (err) {
-    typingRow.remove();
-    const errRow = document.createElement('div');
-    errRow.className = 'msg-row';
-    errRow.innerHTML = `
-      <div class="av-bot">
-        <svg viewBox="0 0 20 20" fill="none" stroke="#1a1a1a" stroke-width="1.6" width="13" height="13">
-          <rect x="2" y="8" width="16" height="9" rx="2"/>
+    // Typing indicator
+    const typingRow = document.createElement('div');
+    typingRow.className = 'msg-row';
+    typingRow.innerHTML = `
+      <div class="av bot">
+        <svg viewBox="0 0 20 20" fill="none" stroke="#fff" stroke-width="1.6" width="14" height="14">
+          <rect x="2" y="8" width="16" height="9" rx="2"/><path d="M10 8V5"/><circle cx="10" cy="3.5" r="1.5"/>
         </svg>
       </div>
       <div class="bot-response">
-        <div class="err-bubble">Could not reach the server. Please try again.</div>
+        <div class="typing-indicator"><span></span><span></span><span></span></div>
       </div>`;
-    messagesEl.appendChild(errRow);
-  }
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-
-// --- FORM VALIDATION & SUBMISSION LOGIC ---
-document.getElementById('submit-lead-btn').onclick = async () => {
-    const name = document.getElementById('lead-name').value.trim();
-    const email = document.getElementById('lead-email').value.trim();
-    const phone = document.getElementById('lead-phone').value.trim();
-    const errorEl = document.getElementById('lead-error');
-    const btn = document.getElementById('submit-lead-btn');
-
-    // Basic empty check
-    if (!name || !email || !phone) {
-        errorEl.innerHTML = "<strong>Missing info:</strong> Please fill out all fields.";
-        errorEl.style.display = 'block';
-        return;
-    }
-
-    // Regex Validation
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]{2,}\.[a-zA-Z]{2,}$/;
-    const phoneRegex = /^\+?[\d\s-]{10,15}$/; 
-
-    if (!emailRegex.test(email)) {
-        errorEl.innerHTML = "<strong>Invalid Email:</strong> Please check your email format.";
-        errorEl.style.display = 'block';
-        return;
-    }
-
-    const cleanPhone = phone.replace(/[\s-]/g, '');
-    if (!phoneRegex.test(phone) || cleanPhone.length < 10) {
-        errorEl.innerHTML = "<strong>Invalid Phone:</strong> Enter a valid 10+ digit number.";
-        errorEl.style.display = 'block';
-        return;
-    }
-
-    // All clear - proceed
-    errorEl.style.display = 'none';
-    btn.textContent = "Saving...";
-    btn.disabled = true;
+    messagesEl.appendChild(typingRow);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
 
     try {
-        const response = await fetch('http://127.0.0.1:8080/submit-lead', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, phone })
-        });
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message })
+      });
 
-        if (response.ok) {
-            localStorage.setItem('brolly_user_verified', 'true');
-            isVerified = true;
-            
-            document.getElementById('lead-overlay').style.display = 'none';
-       
-            if (pendingMessage) {
-                inputEl.value = pendingMessage;
-                sendMessage(); 
-            }
-        } else {
-            throw new Error("API rejected the submission");
-        }
+      const data = await response.json();
+      typingRow.remove();
+
+      const botRow = renderBotMessage(data);
+      messagesEl.appendChild(botRow);
+
     } catch (err) {
-        errorEl.innerHTML = "<strong>Connection Error:</strong> Could not save details. Please try again.";
-        errorEl.style.display = 'block';
-        btn.textContent = "Start Chatting";
-        btn.disabled = false;
+      typingRow.remove();
+      const errRow = document.createElement('div');
+      errRow.className = 'msg-row';
+      errRow.innerHTML = `
+        <div class="av bot">
+          <svg viewBox="0 0 20 20" fill="none" stroke="#fff" stroke-width="1.6" width="14" height="14">
+            <rect x="2" y="8" width="16" height="9" rx="2"/>
+          </svg>
+        </div>
+        <div class="bot-response">
+          <div class="err-bubble">Could not reach the server. Make sure FastAPI is running at the configured URL.</div>
+        </div>`;
+      messagesEl.appendChild(errRow);
     }
-};
 
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
 </script>
+</body>
+</html>
